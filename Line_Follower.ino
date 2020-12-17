@@ -1,19 +1,13 @@
-//Program for line following robot using arduino uno
+//Program for line following robot using arduino uno 
 
-#include<NewPing.h>
-
-NewPing sonar(A1,A2,200);
-
-#define a 5 
-#define b 4 
-#define c 3 
-#define d 2 
-
-#define el 9 
-#define er 10
+#define a 4
+#define b 5 
+#define c 6 
+#define d 7 
 
 #define irl A3 
-#define irr A4 
+#define irm A4
+#define irr A5 
 
 void fwd(){             //function for moving forward
   digitalWrite(a, HIGH);
@@ -28,13 +22,13 @@ void stp(){            //function to stop
   digitalWrite(c, LOW);
   digitalWrite(d, LOW);
 }
-void hright(){         //function to turn right
+void sright(){         //function to turn right
   digitalWrite(a, HIGH);
   digitalWrite(b, LOW);
   digitalWrite(c, LOW);
   digitalWrite(d, LOW);
 }
-void hleft(){          //function to turn left
+void sleft(){          //function to turn left
   digitalWrite(a, LOW);
   digitalWrite(b, LOW);
   digitalWrite(c, HIGH);
@@ -48,24 +42,35 @@ void setup() {
   pinMode(d, OUTPUT);  //right motor output 2
   pinMode(irl, INPUT); //left IR sensor input
   pinMode(irr, INPUT); //right IR sensor input
-  pinMode(el, OUTPUT); //left motor pwm output
-  pinMode(er, OUTPUT); //right motor pwm output
-  analogWrite(el, 200);//assigning pwm or speed of 200 for left motor
-  analogWrite(er, 200);//assigning pwm or speed of 200 for right motor
+  pinMode(irm, INPUT); //middle IR sensor input
   delay(1000);
 }
 
 void loop() {
-  if(digitalRead(irl)==0 && digitalRead(irr)==0){ //Condition to check the robot in line
-    fwd();
+  if((digitalRead(irl)==0 && digitalRead(irr)==0 && digitalRead(irm)==0) || (digitalRead(irl)==1 && digitalRead(irr)==1 && digitalRead(irm)==1)){ //Condition to check whether the robot is at the end of the path
+      stp();
   }
-  if(digitalRead(irl)==1 && digitalRead(irr)==0){ //Condition to check the robot off the line to right
-    hleft();
+  if(digitalRead(irm)==1 && (digitalRead(irl)==1 || digitalRead(irr)==1)){ //Condition to check whether there is any 90 degree turn
+    if(digitalRead(irl)==1){ //If 90 degree Left turn
+      while(!(digitalRead(irl)==0 && digitalRead(irm)==1 && digitalRead(irr)==0)){
+        sleft();
+      }
+   }
+    if(digitalRead(irr)==1){ //If 90 degree Right turn 
+      while(!(digitalRead(irl)==0 && digitalRead(irm)==1 && digitalRead(irr)==0)){
+        sright();
+      }
+    }    
   }
-  if(digitalRead(irl)==0 && digitalRead(irr)==1){ //Condition to check the robot off the line to left 
-    hright();
-  }
-  if(digitalRead(irl)==1 && digitalRead(irr)==1){ //Condition to check whether the robot is at the end of the path
-    stp();
+  else{
+    if(digitalRead(irl)==0 && digitalRead(irr)==0 && digitalRead(irm)==1){ //Condition to check the robot in line
+      fwd();
+    }
+    if(digitalRead(irl)==1 && digitalRead(irr)==0){ //Condition to check the robot off the line to right
+      sleft();
+    }
+    if(digitalRead(irl)==0 && digitalRead(irr)==1){ //Condition to check the robot off the line to left 
+      sright();
+    }
   }
 }
